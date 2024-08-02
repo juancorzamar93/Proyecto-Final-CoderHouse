@@ -8,4 +8,4 @@ from .extract_data import extract_exchange_data
 from .extract_data import extract_bitmonedero_data
 from .validate_credentials import validate_credentials
 from .clean_and_transformation import clean_data
-from .alert_email import check_for_trend
+from .alert_email import send_email, check_for_trend
