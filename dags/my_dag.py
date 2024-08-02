@@ -67,8 +67,8 @@ def send_alerts(**kwargs):
     cleaned_data = ti.xcom_pull(task_ids='extract_and_transform_data', key='cleaned_data')
     
     # Supongamos que los datos vienen en un formato adecuado, o necesitas transformarlos aquí
-    rate_threshold = Variable.get("rate_threshold", default_var=0.001)  # Ejemplo de umbral
-    btc_price_threshold = Variable.get("btc_price_threshold", default_var=100000)
+    rate_threshold = float(Variable.get("rate_threshold", default_var=0.001))  # Ejemplo de umbral
+    btc_price_threshold = float(Variable.get("btc_price_threshold", default_var=100000))
     
     check_for_alerts(cleaned_data, rate_threshold, btc_price_threshold) 
 

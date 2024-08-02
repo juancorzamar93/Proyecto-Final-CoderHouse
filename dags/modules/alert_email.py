@@ -10,8 +10,8 @@ load_dotenv(dotenv_path)
 
 
 def send_email(subject, body):
-    sender_email = "pythonanaconda93@gmail.com"
-    receiver_email = "pythonanaconda93@gmail.com"  
+    sender_email = os.getenv('SENDER_EMAIL')
+    receiver_email = os.getenv('RECEIVER_EMAIL') 
     password = os.getenv('PASSWORD_EMAIL')  
        
     # Crear el objeto del mensaje
