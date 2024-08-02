@@ -24,7 +24,7 @@ def transform_bitmonedero_data(data):
             #"buy_btc_ars": [data["buy_btc_ars"]],
             #"sell_btc_ars": [data["sell_btc_ars"]],
             "timestamp": [pd.to_datetime(data["updated_at_prices"])],
-            "ingestion_time": [pd.Timestamp.now]   # Añade el tiempo de ingestión
+            "ingestion_time": [pd.Timestamp.now()]   # Añade el tiempo de ingestión
         })        
         return df
     except Exception as e:
