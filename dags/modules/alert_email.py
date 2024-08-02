@@ -35,24 +35,24 @@ def send_email(subject, body):
     except Exception as e:
         print(f"Error al enviar el correo: {e}")
 
-def check_for_alerts(data, rate_threshold): # , btc_price_threshold
+def check_for_alerts(data, rate_threshold, btc_price_threshold):
     """
     Comprueba cambios significativos en el tipo de cambio y en el precio del BTC,
     y envía alertas de correo electrónico si se superan los umbrales establecidos.
     """
     # Alerta para cambio en la tasa de cambio de divisas
-    if abs(data['rate']) > rate_threshold:
+    if data['rate'] > rate_threshold:  #abs(data['rate']) > rate_threshold:
         subject = "Alerta de Tasa de Cambio"
         body = f"La tasa de cambio ha variado significativamente: {data['rate']*100}%"
         send_email(subject, body)
         print("Alerta enviada debido a cambio significativo en la tasa de cambio.")
 
     # Alerta para cambio en el precio de compra de BTC
-    # if abs(data['buy_btc_ars']) > btc_price_threshold:
-    #     subject = "Alerta de Precio BTC"
-    #     body = f"El precio de compra de BTC ha cambiado significativamente, cambio actual: ${data['buy_btc_ars']}"
-    #     send_email(subject, body)
-    #     print("Alerta enviada debido a cambio significativo en el precio de BTC.")
+    if data['buy_btc_ars'] > btc_price_threshold: #abs(data['buy_btc_ars']) > btc_price_threshold:
+        subject = "Alerta de Precio BTC"
+        body = f"El precio de compra de BTC ha cambiado significativamente, cambio actual: ${data['buy_btc_ars']}"
+        send_email(subject, body)
+        print("Alerta enviada debido a cambio significativo en el precio de BTC.")
 
     print("Revisión de alertas completada.")
 

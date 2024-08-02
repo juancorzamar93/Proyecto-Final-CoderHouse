@@ -6,7 +6,6 @@ def transform_data(data):
         timestamp = pd.to_datetime(data.get('timestamp'), unit='s')
         df = pd.DataFrame(rates.items(), columns=['currency', 'rate'])
         df['base'] = data.get('base')
-        #df['date'] = pd.to_datetime(data.get('date'), errors='coerce')  # Maneja fechas inválidas como NaT
         df['timestamp'] = timestamp
         df['ingestion_time'] = pd.Timestamp.now()
         return df
@@ -21,10 +20,8 @@ def transform_bitmonedero_data(data):
             "base": ["ARS"],
             "currency":["BTC"],
             "rate": [data["buy_btc_ars"]],
-            #"buy_btc_ars": [data["buy_btc_ars"]],
-            #"sell_btc_ars": [data["sell_btc_ars"]],
             "timestamp": [pd.to_datetime(data["updated_at_prices"])],
-            "ingestion_time": [pd.Timestamp.now]   # Añade el tiempo de ingestión
+            "ingestion_time": [pd.Timestamp.now()]   # Añade el tiempo de ingestión
         })        
         return df
     except Exception as e:
