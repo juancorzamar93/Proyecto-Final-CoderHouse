@@ -8,9 +8,10 @@ from modules.extract_data import extract_bitmonedero_data as API_extract_bitmone
 from modules.data_transformation import transform_data, transform_bitmonedero_data
 from modules.clean_and_transformation import clean_data
 from modules.load_data import load_data as load_ex_data, load_bitmonedero_data as load_bit_data
-from modules.alert_email import check_for_alerts
+from modules.alert_email import check_for_trend
 from parameters import API_URL
 from dotenv import load_dotenv
+import json
 
 
 load_dotenv()
@@ -62,15 +63,33 @@ def load_bitmonedero_data(**kwargs):
     load_bit_data(cleaned_data)
 
 
+# def send_alerts(**kwargs):
+#     ti = kwargs['ti']
+#     cleaned_data = ti.xcom_pull(task_ids='extract_and_transform_data', key='cleaned_data')
+    
+#     # Supongamos que los datos vienen en un formato adecuado, o necesitas transformarlos aquí
+#     rate_threshold = float(Variable.get("rate_threshold", default_var=0.001))  # Ejemplo de umbral
+#     btc_price_threshold = float(Variable.get("btc_price_threshold", default_var=100000))
+    
+#     check_for_alerts(cleaned_data, rate_threshold, btc_price_threshold) 
+
 def send_alerts(**kwargs):
     ti = kwargs['ti']
-    cleaned_data = ti.xcom_pull(task_ids='extract_and_transform_data', key='cleaned_data')
+    cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='cleaned_exchange_data')
     
-    # Supongamos que los datos vienen en un formato adecuado, o necesitas transformarlos aquí
-    rate_threshold = float(Variable.get("rate_threshold", default_var=0.001))  # Ejemplo de umbral
-    btc_price_threshold = float(Variable.get("btc_price_threshold", default_var=100000))
+    previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
+    previous_data_list = json.loads(previous_data_list_str)
     
-    check_for_alerts(cleaned_data, rate_threshold, btc_price_threshold) 
+    trend_length = 3
+    if len(previous_data_list) >= trend_length:
+        check_for_trend(cleaned_data, previous_data_list[-trend_length:], trend_length)
+        previous_data_list.append(cleaned_data)
+        previous_data_list = previous_data_list[-trend_length:]
+    else:
+        previous_data_list.append(cleaned_data)
+
+    # Actualizar la variable con los datos más recientes
+    Variable.set("previous_data_list", json.dumps(previous_data_list))
 
 
 default_args = {
