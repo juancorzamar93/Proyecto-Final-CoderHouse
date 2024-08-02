@@ -56,30 +56,62 @@ def send_email(subject, body):
 
 #     print("Revisión de alertas completada.")
 
-def check_for_trend(data, previous_data_list, trend_length=3):
+# def check_for_trend(data, previous_data_list, trend_length=3):
+#     """
+#     Comprueba una tendencia de aumento o disminución en los datos durante un número de días consecutivos.
+#     Envía alertas si se detecta una tendencia significativa.
+#     """
+#     trend_detected = False
+
+#     # Comprueba tendencia en tasa de cambio
+#     rate_trend = all(data['rate'] > prev_data['rate'] for prev_data in previous_data_list)
+#     if rate_trend:
+#         trend_detected = True
+#         subject = "Alerta de Tendencia de Aumento de Tasa de Cambio"
+#         body = f"Se ha detectado una tendencia de aumento en la tasa de cambio durante los últimos {trend_length} días."
+#         send_email(subject, body)
+#         print("Alerta enviada debido a tendencia de aumento en la tasa de cambio.")
+
+#     # Comprueba tendencia en precio de BTC
+#     btc_trend = all(data['buy_btc_ars'] > prev_data['buy_btc_ars'] for prev_data in previous_data_list)
+#     if btc_trend:
+#         trend_detected = True
+#         subject = "Alerta de Tendencia de Aumento de Precio BTC"
+#         body = f"Se ha detectado una tendencia de aumento en el precio de BTC durante los últimos {trend_length} días."
+#         send_email(subject, body)
+#         print("Alerta enviada debido a tendencia de aumento en el precio de BTC.")
+
+#     if not trend_detected:
+#         print("No se detectaron tendencias significativas.")
+
+def check_for_trend(data, previous_data_list, trend_length):
     """
     Comprueba una tendencia de aumento o disminución en los datos durante un número de días consecutivos.
     Envía alertas si se detecta una tendencia significativa.
     """
     trend_detected = False
 
-    # Comprueba tendencia en tasa de cambio
-    rate_trend = all(data['rate'] > prev_data['rate'] for prev_data in previous_data_list)
-    if rate_trend:
-        trend_detected = True
-        subject = "Alerta de Tendencia de Aumento de Tasa de Cambio"
-        body = f"Se ha detectado una tendencia de aumento en la tasa de cambio durante los últimos {trend_length} días."
-        send_email(subject, body)
-        print("Alerta enviada debido a tendencia de aumento en la tasa de cambio.")
+    # Filtrar las tasas de cambio (excluyendo BTC)
+    rate_data = data[data['currency'] != 'BTC']
+    btc_data = data[data['currency'] == 'BTC']
 
-    # Comprueba tendencia en precio de BTC
-    btc_trend = all(data['buy_btc_ars'] > prev_data['buy_btc_ars'] for prev_data in previous_data_list)
-    if btc_trend:
-        trend_detected = True
-        subject = "Alerta de Tendencia de Aumento de Precio BTC"
-        body = f"Se ha detectado una tendencia de aumento en el precio de BTC durante los últimos {trend_length} días."
-        send_email(subject, body)
-        print("Alerta enviada debido a tendencia de aumento en el precio de BTC.")
+    for _, row in rate_data.iterrows():
+        rate_trend = all(row['rate'] > prev_data['rate'] for prev_data in previous_data_list if prev_data['currency'] == row['currency'])
+        if rate_trend:
+            trend_detected = True
+            subject = f"Alerta de Tendencia de Aumento de Tasa de Cambio para {row['currency']}"
+            body = f"Se ha detectado una tendencia de aumento en la tasa de cambio de {row['currency']} durante los últimos {trend_length} días."
+            send_email(subject, body)
+            print(f"Alerta enviada debido a tendencia de aumento en la tasa de cambio de {row['currency']}.")
+
+    if not btc_data.empty:
+        btc_trend = all(btc_data['rate'].values[0] > prev_data['rate'] for prev_data in previous_data_list if prev_data['currency'] == 'BTC')
+        if btc_trend:
+            trend_detected = True
+            subject = "Alerta de Tendencia de Aumento de Precio BTC"
+            body = f"Se ha detectado una tendencia de aumento en el precio de BTC durante los últimos {trend_length} días."
+            send_email(subject, body)
+            print("Alerta enviada debido a tendencia de aumento en el precio de BTC.")
 
     if not trend_detected:
         print("No se detectaron tendencias significativas.")

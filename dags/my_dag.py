@@ -73,24 +73,45 @@ def load_bitmonedero_data(**kwargs):
     
 #     check_for_alerts(cleaned_data, rate_threshold, btc_price_threshold) 
 
+# def send_alerts(**kwargs):
+#     ti = kwargs['ti']
+#     cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='cleaned_exchange_data')
+    
+#     previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
+#     previous_data_list = json.loads(previous_data_list_str)
+    
+#     trend_length = 3
+#     if len(previous_data_list) >= trend_length:
+#         check_for_trend(cleaned_data, previous_data_list[-trend_length:], trend_length)
+#         previous_data_list.append(cleaned_data)
+#         previous_data_list = previous_data_list[-trend_length:]
+#     else:
+#         previous_data_list.append(cleaned_data)
+
+#     # Actualizar la variable con los datos más recientes
+#     Variable.set("previous_data_list", json.dumps(previous_data_list))
+
 def send_alerts(**kwargs):
     ti = kwargs['ti']
     cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='cleaned_exchange_data')
+    cleaned_data_bit = ti.xcom_pull(task_ids='load_bitmonedero_data', key='cleaned_bitmonedero_data')
+    
+    # Combinar los datos
+    combined_data = cleaned_data.append(cleaned_data_bit, ignore_index=True)
     
     previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
     previous_data_list = json.loads(previous_data_list_str)
     
-    trend_length = 3
+    trend_length = 1
     if len(previous_data_list) >= trend_length:
-        check_for_trend(cleaned_data, previous_data_list[-trend_length:], trend_length)
-        previous_data_list.append(cleaned_data)
+        check_for_trend(combined_data, previous_data_list[-trend_length:], trend_length)
+        previous_data_list.append(combined_data.to_dict('records'))
         previous_data_list = previous_data_list[-trend_length:]
     else:
-        previous_data_list.append(cleaned_data)
+        previous_data_list.append(combined_data.to_dict('records'))
 
     # Actualizar la variable con los datos más recientes
     Variable.set("previous_data_list", json.dumps(previous_data_list))
-
 
 default_args = {
     'owner': 'juan_ml',
