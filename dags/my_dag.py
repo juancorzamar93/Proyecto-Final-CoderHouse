@@ -41,6 +41,7 @@ def load_exchange_data(**kwargs):
     ti = kwargs['ti']
     cleaned_data = ti.xcom_pull(task_ids='transform_and_clean_exchange_data', key='cleaned_exchange_data')
     load_ex_data(cleaned_data)
+    ti.xcom_push(key='final_cleaned_exchange_data', value=cleaned_data)
 
 
 def extract_bitmonedero_data(**kwargs):
@@ -61,6 +62,8 @@ def load_bitmonedero_data(**kwargs):
     ti = kwargs['ti']
     cleaned_data = ti.xcom_pull(task_ids='transform_and_clean_bitmonedero_data', key='cleaned_bitmonedero_data')
     load_bit_data(cleaned_data)
+      # Empujar los datos limpiados de nuevo a XCom para la tarea de alerta
+    ti.xcom_push(key='final_cleaned_bitmonedero_data', value=cleaned_data)
 
 
 # def send_alerts(**kwargs):
@@ -136,7 +139,8 @@ def send_alerts(**kwargs):
     previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
     previous_data_list = json.loads(previous_data_list_str)
     
-    trend_length = 3  # Definir una sola vez aquí
+    trend_length = 2  # dia o dias para comparar el dia actual con el anterior
+
     if len(previous_data_list) >= trend_length:
         check_for_trend(combined_data, previous_data_list[-trend_length:], trend_length)
         previous_data_list.append(combined_data.to_dict('records'))
