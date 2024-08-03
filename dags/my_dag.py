@@ -118,8 +118,8 @@ def load_bitmonedero_data(**kwargs):
 
 def send_alerts(**kwargs):
     ti = kwargs['ti']
-    cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='cleaned_exchange_data')
-    cleaned_data_bit = ti.xcom_pull(task_ids='load_bitmonedero_data', key='cleaned_bitmonedero_data')
+    cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='final_cleaned_exchange_data')
+    cleaned_data_bit = ti.xcom_pull(task_ids='load_bitmonedero_data', key='final_cleaned_bitmonedero_data')
     
     # Comprobaciones para cleaned_data y cleaned_data_bit
     if cleaned_data is None:
