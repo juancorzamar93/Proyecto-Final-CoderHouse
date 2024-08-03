@@ -12,6 +12,7 @@ from modules.alert_email import send_email, check_for_trend
 from parameters import API_URL
 from dotenv import load_dotenv
 import json
+import pandas as pd
 
 
 load_dotenv()
@@ -121,26 +122,34 @@ def send_alerts(**kwargs):
     cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='final_cleaned_exchange_data')
     cleaned_data_bit = ti.xcom_pull(task_ids='load_bitmonedero_data', key='final_cleaned_bitmonedero_data')
     
+    # Depuración: Imprimir datos obtenidos
+    print(f"cleaned_data: {cleaned_data}")
+    print(f"cleaned_data_bit: {cleaned_data_bit}")
+
     # Comprobaciones para cleaned_data y cleaned_data_bit
     if cleaned_data is None:
-        error_message = "Error: cleaned_data is None."
+        error_message = "Error: cleaned_data es None."
         print(error_message)
         send_email("ETL Failure Alert", error_message)
         raise ValueError(error_message)
     elif cleaned_data_bit is None:
-        error_message = "Error: cleaned_data_bit is None."
+        error_message = "Error: cleaned_data_bit es None."
         print(error_message)
         send_email("ETL Failure Alert", error_message)
         raise ValueError(error_message)
     
-    # Combinar los datos
-    combined_data = cleaned_data.append(cleaned_data_bit, ignore_index=True)
+     # Asegurar que ambos DataFrames tienen las mismas columnas
+    common_columns = list(set(cleaned_data.columns) & set(cleaned_data_bit.columns))
+    cleaned_data = cleaned_data[common_columns]
+    cleaned_data_bit = cleaned_data_bit[common_columns]
+
+    # Combinar los datos usando pd.concat
+    combined_data = pd.concat([cleaned_data, cleaned_data_bit], ignore_index=True)
     
     previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
     previous_data_list = json.loads(previous_data_list_str)
     
     trend_length = 2  # dia o dias para comparar el dia actual con el anterior
-
     if len(previous_data_list) >= trend_length:
         check_for_trend(combined_data, previous_data_list[-trend_length:], trend_length)
         previous_data_list.append(combined_data.to_dict('records'))
@@ -150,8 +159,6 @@ def send_alerts(**kwargs):
 
     # Actualizar la variable con los datos más recientes
     Variable.set("previous_data_list", json.dumps(previous_data_list))
-
-
 
 default_args = {
     'owner': 'juan_ml',
