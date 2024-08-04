@@ -84,28 +84,28 @@ def send_email(subject, body):
 #     if not trend_detected:
 #         print("No se detectaron tendencias significativas.")
 
-def check_for_trend(data, previous_data_list, trend_length):
+def check_for_trend(data, previous_data_list, trend_length, currency_column='currency', rate_column='rate'):
     """
     Comprueba una tendencia de aumento o disminución en los datos durante un número de días consecutivos.
     Envía alertas si se detecta una tendencia significativa.
     """
     trend_detected = False
 
-    # Filtrar las tasas de cambio (excluyendo BTC)
-    rate_data = data[data['currency'] != 'BTC']
-    btc_data = data[data['currency'] == 'BTC']
+    # Filtrar las tasas de cambio (excluyendo BTC si existe en los datos)
+    rate_data = data[data[currency_column] != 'BTC']
+    btc_data = data[data[currency_column] == 'BTC']
 
     for _, row in rate_data.iterrows():
-        rate_trend = all(row['rate'] > prev_data['rate'] for prev_data in previous_data_list if prev_data['currency'] == row['currency'])
+        rate_trend = all(row[rate_column] > prev_data[rate_column] for prev_data in previous_data_list if prev_data[currency_column] == row[currency_column])
         if rate_trend:
             trend_detected = True
-            subject = f"Alerta de Tendencia de Aumento de Tasa de Cambio para {row['currency']}"
-            body = f"Se ha detectado una tendencia de aumento en la tasa de cambio de {row['currency']} durante los últimos {trend_length} días."
+            subject = f"Alerta de Tendencia de Aumento de Tasa de Cambio para {row[currency_column]}"
+            body = f"Se ha detectado una tendencia de aumento en la tasa de cambio de {row[currency_column]} durante los últimos {trend_length} días."
             send_email(subject, body)
-            print(f"Alerta enviada debido a tendencia de aumento en la tasa de cambio de {row['currency']}.")
+            print(f"Alerta enviada debido a tendencia de aumento en la tasa de cambio de {row[currency_column]}.")
 
     if not btc_data.empty:
-        btc_trend = all(btc_data['rate'].values[0] > prev_data['rate'] for prev_data in previous_data_list if prev_data['currency'] == 'BTC')
+        btc_trend = all(btc_data[rate_column].values[0] > prev_data[rate_column] for prev_data in previous_data_list if prev_data[currency_column] == 'BTC')
         if btc_trend:
             trend_detected = True
             subject = "Alerta de Tendencia de Aumento de Precio BTC"
