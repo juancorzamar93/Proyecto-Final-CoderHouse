@@ -80,25 +80,31 @@ def send_alerts_exchange_rate(**kwargs):
         print(error_message)
         send_email("ETL Failure Alert", error_message)
         raise ValueError(error_message)
-    
-    previous_data_list_str = Variable.get("previous_data_list_exchange", default_var="[]")
-    previous_data_list = json.loads(previous_data_list_str)
-    
-    trend_length = 3  # Definir una sola vez aquí
-    if len(previous_data_list) >= trend_length:
-        check_for_trend(cleaned_data, previous_data_list[-trend_length:], trend_length, 'currency', 'rate')
-    
-    # Convertir Timestamps a cadenas
-    cleaned_data_dict = cleaned_data.to_dict('records')
-    for record in cleaned_data_dict:
-        record['timestamp'] = record['timestamp'].isoformat()
-        record['ingestion_time'] = record['ingestion_time'].isoformat()
+    else:
+        # Convertir cleaned_data a string para enviar por correo
+        cleaned_data_str = cleaned_data.to_string()
 
-    previous_data_list.append(cleaned_data_dict)
-    previous_data_list = previous_data_list[-trend_length:]
+        previous_data_list_str = Variable.get("previous_data_list_exchange", default_var="[]")
+        previous_data_list = json.loads(previous_data_list_str)
 
-    # Actualizar la variable con los datos más recientes
-    Variable.set("previous_data_list_exchange", json.dumps(previous_data_list))
+        trend_length = 3  # Definir una sola vez aquí
+        if len(previous_data_list) >= trend_length:
+            check_for_trend(cleaned_data, previous_data_list[-trend_length:], trend_length, 'currency', 'rate')
+        
+        # Convertir Timestamps a cadenas
+        cleaned_data_dict = cleaned_data.to_dict('records')
+        for record in cleaned_data_dict:
+            record['timestamp'] = record['timestamp'].isoformat()
+            record['ingestion_time'] = record['ingestion_time'].isoformat()
+
+        previous_data_list.append(cleaned_data_dict)
+        previous_data_list = previous_data_list[-trend_length:]
+
+        # Actualizar la variable con los datos más recientes
+        Variable.set("previous_data_list_exchange", json.dumps(previous_data_list))
+
+        # Enviar correo con los datos cargados
+        send_email("Datos cargados correctamente - Exchange Rate", f"Datos cargados:\n{cleaned_data_str}")
 
 def send_alerts_bitmonedero(**kwargs):
     ti = kwargs['ti']
@@ -113,26 +119,31 @@ def send_alerts_bitmonedero(**kwargs):
         print(error_message)
         send_email("ETL Failure Alert", error_message)
         raise ValueError(error_message)
-    
-    previous_data_list_str = Variable.get("previous_data_list_bitmonedero", default_var="[]")
-    previous_data_list = json.loads(previous_data_list_str)
-    
-    trend_length = 3  # Definir una sola vez aquí
-    if len(previous_data_list) >= trend_length:
-        check_for_trend(cleaned_data_bit, previous_data_list[-trend_length:], trend_length, 'currency', 'rate')
-    
-    # Convertir Timestamps a cadenas
-    cleaned_data_bit_dict = cleaned_data_bit.to_dict('records')
-    for record in cleaned_data_bit_dict:
-        record['timestamp'] = record['timestamp'].isoformat()
-        record['ingestion_time'] = record['ingestion_time'].isoformat()
+    else:
+        # Convertir cleaned_data_bit a string para enviar por correo
+        cleaned_data_bit_str = cleaned_data_bit.to_string()
 
-    previous_data_list.append(cleaned_data_bit_dict)
-    previous_data_list = previous_data_list[-trend_length:]
+        previous_data_list_str = Variable.get("previous_data_list_bitmonedero", default_var="[]")
+        previous_data_list = json.loads(previous_data_list_str)
 
-    # Actualizar la variable con los datos más recientes
-    Variable.set("previous_data_list_bitmonedero", json.dumps(previous_data_list))
+        trend_length = 3  # Definir una sola vez aquí
+        if len(previous_data_list) >= trend_length:
+            check_for_trend(cleaned_data_bit, previous_data_list[-trend_length:], trend_length, 'currency', 'rate')
+        
+        # Convertir Timestamps a cadenas
+        cleaned_data_bit_dict = cleaned_data_bit.to_dict('records')
+        for record in cleaned_data_bit_dict:
+            record['timestamp'] = record['timestamp'].isoformat()
+            record['ingestion_time'] = record['ingestion_time'].isoformat()
 
+        previous_data_list.append(cleaned_data_bit_dict)
+        previous_data_list = previous_data_list[-trend_length:]
+
+        # Actualizar la variable con los datos más recientes
+        Variable.set("previous_data_list_bitmonedero", json.dumps(previous_data_list))
+
+        # Enviar correo con los datos cargados
+        send_email("Datos cargados correctamente - Bitmonedero", f"Datos cargados:\n{cleaned_data_bit_str}")
 
 default_args = {
     'owner': 'juan_ml',

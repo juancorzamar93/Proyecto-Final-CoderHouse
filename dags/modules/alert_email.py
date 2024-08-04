@@ -47,7 +47,7 @@ def check_for_trend(data, previous_data_list, trend_length, currency_column='cur
     btc_data = data[data[currency_column] == 'BTC']
 
     for _, row in rate_data.iterrows():
-        rate_trend = all(row[rate_column] > prev_data[rate_column] for prev_data in previous_data_list if prev_data[currency_column] == row[currency_column])
+        rate_trend = all(row[rate_column] > prev_data[rate_column] for prev_data_list in previous_data_list for prev_data in prev_data_list if prev_data[currency_column] == row[currency_column])
         if rate_trend:
             trend_detected = True
             subject = f"Alerta de Tendencia de Aumento de Tasa de Cambio para {row[currency_column]}"
@@ -56,7 +56,7 @@ def check_for_trend(data, previous_data_list, trend_length, currency_column='cur
             print(f"Alerta enviada debido a tendencia de aumento en la tasa de cambio de {row[currency_column]}.")
 
     if not btc_data.empty:
-        btc_trend = all(btc_data[rate_column].values[0] > prev_data[rate_column] for prev_data in previous_data_list if prev_data[currency_column] == 'BTC')
+        btc_trend = all(btc_data[rate_column].values[0] > prev_data[rate_column] for prev_data_list in previous_data_list for prev_data in prev_data_list if prev_data[currency_column] == 'BTC')
         if btc_trend:
             trend_detected = True
             subject = "Alerta de Tendencia de Aumento de Precio BTC"
