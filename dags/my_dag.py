@@ -9,7 +9,6 @@ from modules.data_transformation import transform_data, transform_bitmonedero_da
 from modules.clean_and_transformation import clean_data
 from modules.load_data import load_data as load_ex_data, load_bitmonedero_data as load_bit_data
 from modules.alert_email import send_email, check_for_trend
-# from modules.alert_email import check_for_alerts
 from parameters import API_URL
 from dotenv import load_dotenv
 import json
@@ -67,104 +66,6 @@ def load_bitmonedero_data(**kwargs):
       # Empujar los datos limpiados de nuevo a XCom para la tarea de alerta
     ti.xcom_push(key='final_cleaned_bitmonedero_data', value=cleaned_data)
 
-
-# def send_alerts(**kwargs):
-#     ti = kwargs['ti']
-#     cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='final_cleaned_exchange_data')
-#     cleaned_data_bit = ti.xcom_pull(task_ids='load_bitmonedero_data', key='final_cleaned_bitmonedero_data')
-    
-#     Depuración: Imprimir datos obtenidos
-#     print(f"cleaned_data: {cleaned_data}")
-#     print(f"cleaned_data_bit: {cleaned_data_bit}")
-    
-#     # Supongamos que los datos vienen en un formato adecuado, o necesitas transformarlos aquí
-#     rate_threshold = float(Variable.get("rate_threshold", default_var=0.001))  # Ejemplo de umbral
-#     btc_price_threshold = float(Variable.get("btc_price_threshold", default_var=100000))
-    
-#     check_for_alerts(cleaned_data, rate_threshold, btc_price_threshold) 
-
-# def send_alerts(**kwargs):
-#     ti = kwargs['ti']
-#     cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='cleaned_exchange_data')
-    
-#     previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
-#     previous_data_list = json.loads(previous_data_list_str)
-    
-#     trend_length = 3
-#     if len(previous_data_list) >= trend_length:
-#         check_for_trend(cleaned_data, previous_data_list[-trend_length:], trend_length)
-#         previous_data_list.append(cleaned_data)
-#         previous_data_list = previous_data_list[-trend_length:]
-#     else:
-#         previous_data_list.append(cleaned_data)
-
-#     # Actualizar la variable con los datos más recientes
-#     Variable.set("previous_data_list", json.dumps(previous_data_list))
-
-# def send_alerts(**kwargs):
-#     ti = kwargs['ti']
-#     cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='cleaned_exchange_data')
-#     cleaned_data_bit = ti.xcom_pull(task_ids='load_bitmonedero_data', key='cleaned_bitmonedero_data')
-    
-#     # Combinar los datos
-#     combined_data = cleaned_data.append(cleaned_data_bit, ignore_index=True)
-    
-#     previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
-#     previous_data_list = json.loads(previous_data_list_str)
-    
-#     trend_length = 1 # dia o dias para comparar el dia actual con el anterior
-#     if len(previous_data_list) >= trend_length:
-#         check_for_trend(combined_data, previous_data_list[-trend_length:], trend_length)
-#         previous_data_list.append(combined_data.to_dict('records'))
-#         previous_data_list = previous_data_list[-trend_length:]
-#     else:
-#         previous_data_list.append(combined_data.to_dict('records'))
-
-#     # Actualizar la variable con los datos más recientes
-#     Variable.set("previous_data_list", json.dumps(previous_data_list))
-
-# def send_alerts(**kwargs):
-#     ti = kwargs['ti']
-#     cleaned_data = ti.xcom_pull(task_ids='load_exchange_data', key='final_cleaned_exchange_data')
-#     cleaned_data_bit = ti.xcom_pull(task_ids='load_bitmonedero_data', key='final_cleaned_bitmonedero_data')
-    
-#     # Depuración: Imprimir datos obtenidos
-#     print(f"cleaned_data: {cleaned_data}")
-#     print(f"cleaned_data_bit: {cleaned_data_bit}")
-
-#     # Comprobaciones para cleaned_data y cleaned_data_bit
-#     if cleaned_data is None:
-#         error_message = "Error: cleaned_data es None."
-#         print(error_message)
-#         send_email("ETL Failure Alert", error_message)
-#         raise ValueError(error_message)
-#     elif cleaned_data_bit is None:
-#         error_message = "Error: cleaned_data_bit es None."
-#         print(error_message)
-#         send_email("ETL Failure Alert", error_message)
-#         raise ValueError(error_message)
-    
-#      # Asegurar que ambos DataFrames tienen las mismas columnas
-#     common_columns = list(set(cleaned_data.columns) & set(cleaned_data_bit.columns))
-#     cleaned_data = cleaned_data[common_columns]
-#     cleaned_data_bit = cleaned_data_bit[common_columns]
-
-#     # Combinar los datos usando pd.concat
-#     combined_data = pd.concat([cleaned_data, cleaned_data_bit], ignore_index=True)
-    
-#     previous_data_list_str = Variable.get("previous_data_list", default_var="[]")
-#     previous_data_list = json.loads(previous_data_list_str)
-    
-#     trend_length = 2  # dia o dias para comparar el dia actual con el anterior
-#     if len(previous_data_list) >= trend_length:
-#         check_for_trend(combined_data, previous_data_list[-trend_length:], trend_length)
-#         previous_data_list.append(combined_data.to_dict('records'))
-#         previous_data_list = previous_data_list[-trend_length:]
-#     else:
-#         previous_data_list.append(combined_data.to_dict('records'))
-
-#     # Actualizar la variable con los datos más recientes
-#     Variable.set("previous_data_list", json.dumps(previous_data_list))
 
 def send_alerts_exchange_rate(**kwargs):
     ti = kwargs['ti']
