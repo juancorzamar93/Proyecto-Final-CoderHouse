@@ -69,14 +69,23 @@ El pipeline ETL (Extract, Transform, Load) está diseñado para:
    
 ### Uso
 Accede a la interfaz web de Airflow en http://localhost:8080.
+
 En la interfaz de Airflow, habilita y ejecuta el DAG exchange_rate_dag.
 
 ### Tareas en el DAG
-extract_exchange_data: Extrae datos de tasas de cambio desde la API.
-extract_bitmonedero_data: Extrae datos de Bitmonedero desde la API.
-transform_and_clean_exchange_data: Transforma y limpia los datos de tasas de cambio.
-transform_and_clean_bitmonedero_data: Transforma y limpia los datos de Bitmonedero.
-load_exchange_data: Carga los datos de tasas de cambio limpios.
-load_bitmonedero_data: Carga los datos de Bitmonedero limpios.
-alert_email_exchange: Envía alertas por correo electrónico para tasas de cambio.
-alert_email_bitmonedero: Envía alertas por correo electrónico para Bitmonedero.
+#### extract_exchange_data: Extrae datos de tasas de cambio desde la API.
+
+#### extract_bitmonedero_data: Extrae datos de Bitmonedero desde la API.
+
+#### transform_and_clean_exchange_data: Transforma y limpia los datos de tasas de cambio.
+
+#### transform_and_clean_bitmonedero_data: Transforma y limpia los datos de Bitmonedero.
+
+#### load_exchange_data: Carga los datos de tasas de cambio limpios.
+
+#### load_bitmonedero_data: Carga los datos de Bitmonedero limpios.
+
+#### alert_email_exchange: Envía alertas por correo electrónico para tasas de cambio.
+
+#### alert_email_bitmonedero: Envía alertas por correo electrónico para Bitmonedero.
+
